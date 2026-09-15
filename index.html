@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>전설의 검 키우기 (medierbu1)</title>
+    <style>
+        :root {
+            --bg-color: #121214;
+            --card-bg: #1e1e24;
+            --accent: #ffd700;
+            --accent-hover: #e6c200;
+            --danger: #ff4757;
+            --success: #2ed573;
+            --text: #ffffff;
+            --text-sub: #a0a0aa;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 480px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            box-sizing: border-box;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 1px solid #2d2d38;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            margin: 0 0 10px 0;
+            font-size: 24px;
+            color: var(--accent);
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-box .label {
+            font-size: 12px;
+            color: var(--text-sub);
+            margin-bottom: 4px;
+        }
+
+        .stat-box .value {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .sword-display {
+            background: radial-gradient(circle, rgba(255,215,0,0.1) 0%, rgba(0,0,0,0) 70%);
+            border: 2px solid #333344;
+            border-radius: 16px;
+            padding: 30px 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .sword-icon {
+            font-size: 64px;
+            margin-bottom: 10px;
+            display: inline-block;
+            filter: drop-shadow(0 0 10px rgba(255,215,0,0.3));
+        }
+
+        .sword-name {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .sword-tier {
+            font-size: 14px;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            background: #2a2a36;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary { background: #4f46e5; }
+        .btn-success { background: #10b981; }
+        .btn-warning { background: #f59e0b; }
+        .btn-purple { background: #8b5cf6; }
+
+        .btn-sub {
+            font-size: 11px;
+            opacity: 0.8;
+            font-weight: normal;
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .log-box {
+            background: #141418;
+            border-radius: 10px;
+            padding: 10px 15px;
+            height: 90px;
+            overflow-y: auto;
+            font-size: 12px;
+            color: var(--text-sub);
+            border: 1px solid #22222a;
+        }
+
+        .log-item {
+            margin-bottom: 4px;
+        }
+        .log-item.success { color: var(--success); }
+        .log-item.fail { color: var(--danger); }
+        .log-item.sale { color: var(--accent); }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <div class="header">
+        <h1>🗡️ 검 키우기 (medierbu1)</h1>
+    </div>
+
+    <div class="stat-grid">
+        <div class="stat-box">
+            <div class="label">보유 골드</div>
+            <div class="value" id="gold-display">0 G</div>
+        </div>
+        <div class="stat-box">
+            <div class="label">클릭당 골드 (GPC)</div>
+            <div class="value" id="gpc-display">1 G</div>
+        </div>
+        <div class="stat-box">
+            <div class="label">보유 방어권</div>
+            <div class="value" id="shield-display">0 개</div>
+        </div>
+        <div class="stat-box">
+            <div class="label">환생 보너스 (확률)</div>
+            <div class="value" id="rebirth-bonus-display">+0%</div>
+        </div>
+    </div>
+
+    <div class="sword-display">
+        <div class="sword-icon" id="sword-icon">🪵</div>
+        <div class="sword-name" id="sword-name">목검</div>
+        <div class="sword-tier" id="sword-tier">1 단계</div>
+    </div>
+
+    <button class="btn btn-primary" style="width: 100%; margin-bottom: 10px; height: 50px;" onclick="clickGold()">
+        💰 골드 채굴하기 (+<span id="click-amount">1</span> G)
+    </button>
+
+    <div class="button-group">
+        <button class="btn btn-success" onclick="enhanceSword()">
+            ⚡ 검 강화하기
+            <span class="btn-sub" id="enhance-info">비용: 10G | 확률: 100%</span>
+        </button>
+        <button class="btn btn-warning" onclick="sellSword()">
+            💎 검 판매하기
+            <span class="btn-sub" id="sell-info">GPC +1 상승</span>
+        </button>
+    </div>
+
+    <div class="checkbox-container">
+        <input type="checkbox" id="use-shield-check">
+        <label for="use-shield-check">강화 실패 시 방어권 사용 (<span id="required-shields">1</span>개 필요)</label>
+    </div>
+
+    <div class="button-group">
+        <button class="btn" style="background: #374151;" onclick="buyShield()">
+            🛡️ 방어권 구매
+            <span class="btn-sub" id="shield-cost-info">비용: 500 G</span>
+        </button>
+        <button class="btn btn-purple" onclick="rebirth()">
+            🌀 환생하기 (10단계+)
+            <span class="btn-sub" id="rebirth-info">확률 +1%p 영구 증가</span>
+        </button>
+    </div>
+
+    <div class="log-box" id="game-log">
+        <div class="log-item">게임을 시작합니다. 검을 강화하고 판매하여 GPC를 늘려보세요!</div>
+    </div>
+</div>
+
+<script>
+    const SWORDS = [
+        { tier: 1, name: "목검", icon: "🪵", cost: 10, successRate: 100, sellGpc: 1, sellGold: 5 },
+        { tier: 2, name: "녹슨 철검", icon: "🗡️", cost: 40, successRate: 90, sellGpc: 3, sellGold: 25 },
+        { tier: 3, name: "강철 장검", icon: "⚔️", cost: 150, successRate: 80, sellGpc: 8, sellGold: 100 },
+        { tier: 4, name: "기사의 자존심", icon: "🛡️", cost: 500, successRate: 70, sellGpc: 25, sellGold: 350 },
+        { tier: 5, name: "미스릴 피어서", icon: "💎", cost: 1800, successRate: 60, sellGpc: 70, sellGold: 1200 },
+        { tier: 6, name: "오리하르콘 블레이드", icon: "✨", cost: 6000, successRate: 50, sellGpc: 200, sellGold: 4500 },
+        { tier: 7, name: "화염의 마검", icon: "🔥", cost: 20000, successRate: 42, sellGpc: 600, sellGold: 15000 },
+        { tier: 8, name: "서리서린 서약", icon: "❄️", cost: 65000, successRate: 35, sellGpc: 1800, sellGold: 50000 },
+        { tier: 9, name: "뇌전의 제왕", icon: "⚡", cost: 200000, successRate: 28, sellGpc: 5000, sellGold: 160000 },
+        { tier: 10, name: "심연의 파괴자", icon: "🔮", cost: 650000, successRate: 22, sellGpc: 15000, sellGold: 500000 },
+        { tier: 11, name: "성검 엑스칼리버", icon: "🌟", cost: 2000000, successRate: 17, sellGpc: 45000, sellGold: 1600000 },
+        { tier: 12, name: "드래곤 슬레이어", icon: "🐉", cost: 6500000, successRate: 13, sellGpc: 140000, sellGold: 5000000 },
+        { tier: 13, name: "은하수의 빛", icon: "🌌", cost: 20000000, successRate: 10, sellGpc: 400000, sellGold: 16000000 },
+        { tier: 14, name: "시공 붕괴검", icon: "⌛", cost: 65000000, successRate: 7, sellGpc: 1200000, sellGold: 50000000 },
+        { tier: 15, name: "신살검 라그나로크", icon: "👑", cost: 200000000, successRate: 5, sellGpc: 3800000, sellGold: 160000000 },
+        { tier: 16, name: "유성 추락검", icon: "☄️", cost: 650000000, successRate: 3, sellGpc: 12000000, sellGold: 500000000 },
+        { tier: 17, name: "창세의 기원", icon: "🌠", cost: 2000000000, successRate: 2, sellGpc: 40000000, sellGold: 1600000000 },
+        { tier: 18, name: "무한의 창조자", icon: "♾️", cost: 10000000000, successRate: 1, sellGpc: 150000000, sellGold: 8000000000 }
+    ];
+
+    let state = {
+        gold: 0,
+        gpc: 1,
+        tier: 1,
+        shields: 0,
+        rebirthBonus: 0,
+        shieldBaseCost: 500
+    };
+
+    function loadGame() {
+        const saved = localStorage.getItem('medierbu1_sword_save');
+        if (saved) {
+            state = { ...state, ...JSON.parse(saved) };
+        }
+        updateUI();
+    }
+
+    function saveGame() {
+        localStorage.setItem('medierbu1_sword_save', JSON.stringify(state));
+    }
+
+    function getRequiredShields(tier) {
+        if (tier <= 4) return 1;
+        if (tier <= 8) return 2;
+        if (tier <= 12) return 3;
+        if (tier <= 16) return 4;
+        return 5;
+    }
+
+    function clickGold() {
+        state.gold += state.gpc;
+        updateUI();
+        saveGame();
+    }
+
+    function enhanceSword() {
+        const currentSword = SWORDS[state.tier - 1];
+        if (state.tier >= SWORDS.length) {
+            addLog("최고 단계 검에 도달하셨습니다!", "fail");
+            return;
+        }
+
+        if (state.gold < currentSword.cost) {
+            addLog("골드가 부족합니다!", "fail");
+            return;
+        }
+
+        state.gold -= currentSword.cost;
+
+        const finalSuccessRate = Math.min(100, currentSword.successRate + state.rebirthBonus);
+        const rand = Math.random() * 100;
+
+        if (rand < finalSuccessRate) {
+            state.tier++;
+            const newSword = SWORDS[state.tier - 1];
+            addLog(`🎉 강화 성공! [${newSword.name}] (단계 ${state.tier})가 되었습니다.`, "success");
+        } else {
+            const useShield = document.getElementById('use-shield-check').checked;
+            const neededShields = getRequiredShields(state.tier);
+
+            if (useShield && state.shields >= neededShields) {
+                state.shields -= neededShields;
+                addLog(`🛡️ 강화 실패! 방어권 ${neededShields}개를 소모하여 검 등급을 보호했습니다.`, "fail");
+            } else {
+                if (useShield) {
+                    addLog(`⚠️ 방어권이 부족하여 등급이 하락했습니다! (필요: ${neededShields}개)`, "fail");
+                }
+                state.tier = Math.max(1, state.tier - 1);
+                addLog(`💥 강화 실패! 단계가 하락하여 [${SWORDS[state.tier - 1].name}]가 되었습니다.`, "fail");
+            }
+        }
+
+        updateUI();
+        saveGame();
+    }
+
+    function sellSword() {
+        if (state.tier === 1) {
+            addLog("기본 1단계 검은 판매할 수 없습니다.", "fail");
+            return;
+        }
+
+        const currentSword = SWORDS[state.tier - 1];
+        state.gpc += currentSword.sellGpc;
+        state.gold += currentSword.sellGold;
+        const soldName = currentSword.name;
+        const gpcGain = currentSword.sellGpc;
+
+        state.tier = 1;
+        addLog(`💰 [${soldName}]을(를) 판매하여 GPC가 +${gpcGain.toLocaleString()} 증가했습니다!`, "sale");
+        
+        updateUI();
+        saveGame();
+    }
+
+    function buyShield() {
+        if (state.gold < state.shieldBaseCost) {
+            addLog("방어권 구매 골드가 부족합니다.", "fail");
+            return;
+        }
+        state.gold -= state.shieldBaseCost;
+        state.shields++;
+        addLog(`🛡️ 방어권을 1개 구매하였습니다.`, "success");
+        updateUI();
+        saveGame();
+    }
+
+    function rebirth() {
+        if (state.tier < 10) {
+            addLog("환생은 10단계(심연의 파괴자) 이상의 검을 보유해야 가능합니다.", "fail");
+            return;
+        }
+
+        const gainedBonus = Math.floor((state.tier - 9));
+        state.rebirthBonus += gainedBonus;
+
+        state.tier = 1;
+        state.gold = 0;
+        state.gpc = 1;
+
+        addLog(`🌀 환생 성공! 강화 성공 확률이 영구적으로 +${gainedBonus}%p 상승합니다!`, "sale");
+        updateUI();
+        saveGame();
+    }
+
+    function updateUI() {
+        const currentSword = SWORDS[state.tier - 1];
+        const nextSword = SWORDS[state.tier];
+
+        document.getElementById('gold-display').innerText = `${state.gold.toLocaleString()} G`;
+        document.getElementById('gpc-display').innerText = `${state.gpc.toLocaleString()} G`;
+        document.getElementById('click-amount').innerText = state.gpc.toLocaleString();
+        document.getElementById('shield-display').innerText = `${state.shields} 개`;
+        document.getElementById('rebirth-bonus-display').innerText = `+${state.rebirthBonus}%`;
+
+        document.getElementById('sword-icon').innerText = currentSword.icon;
+        document.getElementById('sword-name').innerText = currentSword.name;
+        document.getElementById('sword-tier').innerText = `${currentSword.tier} 단계`;
+
+        const finalRate = Math.min(100, currentSword.successRate + state.rebirthBonus);
+        if (nextSword) {
+            document.getElementById('enhance-info').innerText = `비용: ${currentSword.cost.toLocaleString()}G | 확률: ${finalRate}%`;
+        } else {
+            document.getElementById('enhance-info').innerText = `최대 단계 달성`;
+        }
+
+        document.getElementById('sell-info').innerText = state.tier > 1 
+            ? `GPC +${currentSword.sellGpc.toLocaleString()} & +${currentSword.sellGold.toLocaleString()}G` 
+            : `판매 불가 (1단계)`;
+
+        const reqShields = getRequiredShields(state.tier);
+        document.getElementById('required-shields').innerText = reqShields;
+
+        document.getElementById('rebirth-info').innerText = state.tier >= 10 
+            ? `성공확률 +${state.tier - 9}%p 상승 후 초기화` 
+            : `10단계 이상 필요`;
+    }
+
+    function addLog(message, type = "") {
+        const logBox = document.getElementById('game-log');
+        const item = document.createElement('div');
+        item.className = `log-item ${type}`;
+        item.innerText = message;
+        logBox.insertBefore(item, logBox.firstChild);
+    }
+
+    loadGame();
+</script>
+
+</body>
+</html>
